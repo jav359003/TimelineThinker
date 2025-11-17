@@ -6,10 +6,12 @@ __pycache__/
 .Python
 venv/
 .venv/
+docker-compose.env
 
 # FastAPI/Backend env
 .env
 backend/.env
+.env.*
 
 # Node/Vite
 node_modules/

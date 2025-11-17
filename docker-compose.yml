@@ -4,11 +4,9 @@ services:
   # PostgreSQL with pgvector extension
   db:
     image: ankane/pgvector:latest
-    container_name: secondbrain-db
-    environment:
-      POSTGRES_DB: secondbrain
-      POSTGRES_USER: REDACTED
-      POSTGRES_PASSWORD: REDACTED
+    container_name: timeline-thinker-db
+    env_file:
+      - docker-compose.env
     ports:
       - "5432:5432"
     volumes:

@@ -1,494 +1,139 @@
-# Timeline Thinker - AI-Powered Personal Knowledge Base
+# Timeline Thinker
 
-A full-stack AI system that ingests multi-modal data (audio, documents, web pages) and provides intelligent question-answering through a sophisticated multi-agent retrieval pipeline.
+Timeline Thinker is a temporal-first personal knowledge companion. It ingests audio, documents, and webpages, normalizes them into daily "memory" events, and lets you chat with the data through a source-aware multi-agent retrieval pipeline. The UI highlights what you discussed each day, saves per-session notes, and can export those notes as a PDF with one click.
+
+## Why Timeline Thinker?
+- **Temporal-first retrieval** – questions are interpreted through time ("yesterday", "last week"), so answers stay anchored to the right moment.
+- **Source-centric chat** – pick any upload ("Timeline Focus") and the chat sticks to that source until you clear it.
+- **Session memory** – see every source you discussed today, clear the slate, or export the notes.
+- **One-click PDFs** – the timeline sidebar has a "Get Notes" button that downloads context + Q/A snippets for that day.
+- **Five-agent reasoning** – planner, timeline retriever, document retriever, alignment, synthesizer.
 
 ## Architecture Overview
-
-### High-Level Flow
-
 ```
-Ingestion: Audio/PDF/Web → Normalization → Events + Embeddings → Timelines
-                                                    ↓
-Query: Question → Planner → Timeline Retrieval → Document Retrieval → Alignment → Synthesizer → Answer
+Ingestion: Audio / PDF / Webpage -> Chunking -> Events + Embeddings -> Timelines & Sessions
+                                                             ↓
+      Query: Question (+ optional focused source)
+            -> Planner Agent -> Timeline Retrieval -> Document Retrieval
+            -> Alignment Agent -> Synthesizer Agent -> Final answer
 ```
 
-### Key Components
-
-1. **Multi-Modal Ingestion Pipeline**: Processes audio (via Whisper), PDFs, Markdown, and web pages
-2. **Event-Based Storage**: Normalizes all data into timestamped "memory events" with embeddings
-3. **Timeline System**: Organizes events into daily/weekly summaries for efficient temporal retrieval
-4. **Five-Agent Retrieval Pipeline**:
-   - **Planner Agent**: Extracts temporal scope, topics, and entities from questions
-   - **Timeline Retrieval Agent**: Temporal-first search within date ranges
-   - **Document Retrieval Agent**: Semantic search over documents with entity-based refinement
-   - **Alignment Agent**: Finds connections between timeline and document chunks
-   - **Synthesizer Agent**: Generates final answer with self-checking
+### Agents
+1. **Planner** extracts temporal scope, topics, entities.
+2. **Timeline Retrieval** narrows by time before semantic search.
+3. **Document Retrieval** searches documents/webpages and boosts entity matches.
+4. **Alignment** finds relationships between timeline + document chunks.
+5. **Synthesizer** builds the answer, self-checks, and emits the final response.
 
 ## Tech Stack
+- **Backend:** FastAPI, PostgreSQL + pgvector, SQLAlchemy, OpenAI/Anthropic LLMs, Whisper for audio, ReportLab for PDF exports.
+- **Frontend:** React + Vite, custom chat + timeline components, Axios client.
+- **Infra helpers:** Docker (optional), `.env` configuration, npm scripts.
 
-### Backend
-- **Framework**: Python + FastAPI
-- **Database**: PostgreSQL with pgvector extension
-- **LLM**: OpenAI GPT-4 (or Anthropic Claude)
-- **Embeddings**: OpenAI text-embedding-3-small
-- **Transcription**: OpenAI Whisper API
-- **ORM**: SQLAlchemy
-
-### Frontend
-- **Framework**: React + Vite
-- **UI**: Custom components (Timeline Sidebar + Chat Interface)
-- **API Client**: Axios
-
-## Project Structure
-
+## Repository Layout
 ```
-second-brain/
+TimelineThinker/
 ├── backend/
 │   ├── app/
-│   │   ├── models/          # SQLAlchemy ORM models
-│   │   ├── schemas/         # Pydantic validation schemas
-│   │   ├── api/             # FastAPI route handlers
-│   │   ├── services/        # Business logic (LLM, embeddings, etc.)
-│   │   ├── agents/          # Five-agent retrieval pipeline
-│   │   ├── pipeline/        # Ingestion pipelines
-│   │   ├── config.py        # Configuration
-│   │   ├── database.py      # Database setup
-│   │   └── main.py          # FastAPI app entry point
+│   │   ├── api/          # FastAPI routers (ingest, query, timeline, sessions)
+│   │   ├── agents/       # Planner, retrieval, alignment, synthesizer
+│   │   ├── models/       # SQLAlchemy ORM tables
+│   │   ├── pipeline/     # Ingestion flows (audio/document/web)
+│   │   ├── schemas/      # Pydantic request/response models
+│   │   ├── services/     # LLM, embeddings, timeline updates, sessions
+│   │   └── main.py       # FastAPI entrypoint
 │   └── requirements.txt
-│
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Chat/       # Chat interface components
-│   │   │   └── Timeline/   # Timeline sidebar components
-│   │   ├── services/       # API client
-│   │   ├── App.jsx         # Main app component
-│   │   └── main.jsx        # React entry point
+│   │   │   ├── Chat/     # Chat UI + input box
+│   │   │   ├── Sessions/ # Session panel with Clear All
+│   │   │   └── Timeline/ # Timeline sidebar + Get Notes button
+│   │   ├── services/     # Axios API client
+│   │   └── App.jsx       # Root component combining panels
 │   └── package.json
-│
 └── README.md
 ```
 
-## Setup Instructions
+## Getting Started
 
 ### Prerequisites
-
 - Python 3.9+
 - Node.js 18+
-- PostgreSQL 14+ with pgvector extension
-- OpenAI API key (or Anthropic API key)
+- PostgreSQL 14+ with the `pgvector` extension
+- OpenAI (or Anthropic) API key(s)
 
 ### Backend Setup
-
-1. **Install PostgreSQL and pgvector**:
-```bash
-# macOS with Homebrew
-brew install REDACTEDql@14
-brew install pgvector
-
-# Start PostgreSQL
-brew services start REDACTEDql@14
-
-# Create database
-createdb secondbrain
-```
-
-2. **Enable pgvector extension**:
-```sql
-psql secondbrain
-CREATE EXTENSION vector;
-\q
-```
-
-3. **Install Python dependencies**:
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate    # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env        # or create backend/.env manually
+# edit backend/.env with DATABASE_URL, OPENAI_API_KEY, etc.
+uvicorn app.main:app --reload  # http://localhost:8000
 ```
 
-4. **Configure environment variables**:
-```bash
-cp .env.example .env
-# Edit .env and add your API keys
-```
-
-5. **Run the backend**:
-```bash
-python -m app.main
-# Server runs on http://localhost:8000
+Ensure your Postgres DB has pgvector enabled:
+```sql
+CREATE DATABASE timeline_thinker;
+\c timeline_thinker
+CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
 ### Frontend Setup
-
-1. **Install dependencies**:
 ```bash
 cd frontend
 npm install
+npm run dev   # http://localhost:5173 by default
 ```
+Set `VITE_API_BASE_URL` in `frontend/.env` if the backend is not on localhost:8000.
 
-2. **Run the development server**:
-```bash
-npm run dev
-# Frontend runs on http://localhost:3000
-```
+## Key API Endpoints
 
-## API Documentation
+### Ingestion
+- `POST /api/v1/ingest/audio` – multipart file upload, processes via Whisper.
+- `POST /api/v1/ingest/document` – PDFs/Markdown/TXT.
+- `POST /api/v1/ingest/webpage` – `{ "url": "https://..." }` payload.
 
-### Ingestion Endpoints
+Each endpoint returns `{source_id, title, events_created, message}`.
 
-#### 1. Ingest Audio
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/ingest/audio" \
-  -F "file=@meeting.mp3" \
-  -F "user_id=1" \
-  -F "title=Team Meeting Recording"
-```
-
-**Response**:
+### Query
 ```json
+POST /api/v1/query
 {
-  "source_id": 1,
-  "title": "Team Meeting Recording",
-  "status": "success",
-  "events_created": 12,
-  "message": "Audio file 'Team Meeting Recording' ingested successfully. Created 12 events."
+  "user_id": 1,
+  "question": "What is this article talking about?",
+  "source_id": 42          // optional – focuses retrieval on that upload
 }
 ```
+Response includes `answer`, `timeline_chunks`, `document_chunks`, and `confidence`.
 
-#### 2. Ingest Document
+### Timeline
+- `GET /api/v1/timeline/daily?user_id=1&days=30` – summaries for the sidebar.
+- `GET /api/v1/timeline/topics?user_id=1` – most-referenced topics.
+- `GET /api/v1/timeline/day-notes?user_id=1&target_date=2025-01-15` – downloads a PDF with that day’s sources + Q/A snippets.
 
-```bash
-curl -X POST "http://localhost:8000/api/v1/ingest/document" \
-  -F "file=@report.pdf" \
-  -F "user_id=1" \
-  -F "title=Q4 Sales Report"
-```
+### Sessions
+- `GET /api/v1/sessions/current?user_id=1` – returns today’s sources, interactions, and auto summary.
+- `DELETE /api/v1/sessions/current/source/{source_id}?user_id=1` – remove a single source from today.
+- `DELETE /api/v1/sessions/current?user_id=1` – “Clear All” session data for today (mirrors the frontend button).
 
-**Response**:
-```json
-{
-  "source_id": 2,
-  "title": "Q4 Sales Report",
-  "status": "success",
-  "events_created": 25,
-  "message": "Document 'Q4 Sales Report' ingested successfully. Created 25 events."
-}
-```
+## Frontend UX Highlights
+- **Source Selector:** dropdown + pill row showing every upload; clicking sets the chat focus.
+- **Chat Header:** shows which source you’re talking to; system messages log focus changes.
+- **Session Panel:** lists today’s sources, includes per-source remove buttons and a “Clear All” CTA.
+- **Timeline Sidebar:** displays date + summary + number of events, and each row has a “Get Notes” button that hits the PDF endpoint.
 
-#### 3. Ingest Webpage
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/ingest/webpage" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://example.com/article",
-    "user_id": 1
-  }'
-```
-
-**Response**:
-```json
-{
-  "source_id": 3,
-  "title": "How AI is Transforming Healthcare",
-  "url": "https://example.com/article",
-  "status": "success",
-  "events_created": 8,
-  "message": "Webpage 'How AI is Transforming Healthcare' ingested successfully. Created 8 events."
-}
-```
-
-### Query Endpoint
-
-#### Ask a Question
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/query" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": 1,
-    "question": "What were the key points from the team meeting last Tuesday?"
-  }'
-```
-
-**Response**:
-```json
-{
-  "answer": "Based on the team meeting from January 9th, the key points discussed were: 1) The Q4 sales exceeded targets by 15%, 2) New product launch is scheduled for March, and 3) The team agreed to implement weekly standup meetings.",
-  "dates_used": ["2024-01-09"],
-  "timeline_chunks": [
-    {
-      "text": "Team discussed Q4 sales performance...",
-      "relevance_score": 0.92,
-      "date": "2024-01-09",
-      "source_title": null
-    }
-  ],
-  "document_chunks": [
-    {
-      "text": "Q4 Sales Report shows 15% growth...",
-      "relevance_score": 0.87,
-      "date": null,
-      "source_title": "Q4 Sales Report"
-    }
-  ],
-  "confidence": 0.85
-}
-```
-
-### Timeline Endpoints
-
-#### Get Daily Timeline
-
-```bash
-curl "http://localhost:8000/api/v1/timeline/daily?user_id=1&days=30"
-```
-
-**Response**:
-```json
-{
-  "timelines": [
-    {
-      "date": "2024-01-15",
-      "summary": "Worked on project planning and reviewed quarterly reports",
-      "event_count": 5
-    },
-    {
-      "date": "2024-01-14",
-      "summary": "Team meeting and customer feedback analysis",
-      "event_count": 3
-    }
-  ],
-  "total_days": 15
-}
-```
-
-#### Get Topics
-
-```bash
-curl "http://localhost:8000/api/v1/timeline/topics?user_id=1&limit=10"
-```
-
-**Response**:
-```json
-{
-  "topics": [
-    {
-      "name": "Product Development",
-      "event_count": 25,
-      "description": null
-    },
-    {
-      "name": "Sales Strategy",
-      "event_count": 18,
-      "description": null
-    }
-  ],
-  "total_topics": 10
-}
-```
-
-## Data Model
-
-### Core Tables
-
-1. **users**: User accounts
-2. **sources**: Original files/URLs (audio, document, webpage)
-3. **events**: Normalized memory events (chunks of text)
-4. **event_embeddings**: Vector embeddings for semantic search
-5. **entities**: Named entities (people, orgs, locations)
-6. **topics**: Thematic topics
-7. **event_entities**: Many-to-many relationship
-8. **event_topics**: Many-to-many relationship
-9. **daily_timeline**: Daily summaries
-10. **weekly_timeline**: Weekly summaries
-
-### Data Flow
-
-```
-Source (File/URL)
-  ↓ [Extract Text]
-Text
-  ↓ [Chunk]
-Chunks
-  ↓ [Embed + Store]
-Events + EventEmbeddings
-  ↓ [Extract]
-Entities + Topics
-  ↓ [Generate]
-Daily/Weekly Timelines
-```
-
-## Retrieval Strategy: Temporal-First, Then Semantic
-
-The system uses a unique **temporal-first** approach:
-
-1. **Planner Agent** extracts temporal scope from question
-   - "last Tuesday" → specific date
-   - "this week" → date range
-   - No temporal reference → fall back to recent 30 days
-
-2. **Timeline Retrieval Agent** narrows search to temporal scope
-   - Filters events by date/date range
-   - Runs semantic search within that subset
-   - Returns top-k most relevant chunks
-
-3. **Document Retrieval Agent** performs semantic search over documents
-   - Prioritizes chunks sharing entities with timeline chunks
-   - Returns top-k document chunks
-
-4. **Alignment Agent** finds connections
-   - Computes similarity between timeline and document chunks
-   - Identifies related pairs
-   - Creates unified context
-
-5. **Synthesizer Agent** generates answer
-   - Combines all context
-   - Self-checks for completeness
-   - Regenerates if needed
-
-## Design Decisions & Trade-offs
-
-### 1. Temporal-First Retrieval
-
-**Choice**: Narrow by date before semantic search
-
-**Rationale**:
-- Humans naturally think in temporal terms
-- Dramatically reduces search space for better accuracy
-- Most questions have implicit temporal scope
-
-**Trade-off**: May miss relevant older information if temporal scope is too narrow
-
-### 2. Event-Based Normalization
-
-**Choice**: All modalities → events (same schema)
-
-**Rationale**:
-- Unified interface for retrieval
-- Consistent embedding strategy
-- Easy to extend to new modalities
-
-**Trade-off**: Loses some modality-specific metadata
-
-### 3. PostgreSQL + pgvector
-
-**Choice**: Single database for relational + vector data
-
-**Rationale**:
-- Avoids data synchronization issues
-- Transactional consistency
-- Simple deployment
-
-**Trade-off**: Specialized vector databases (Pinecone, Weaviate) may offer better performance at scale
-
-### 4. Multi-Agent Pipeline
-
-**Choice**: Five specialized agents vs. single monolithic retrieval
-
-**Rationale**:
-- Modularity and testability
-- Each agent has clear responsibility
-- Easy to improve individual components
-
-**Trade-off**: More complex orchestration and latency
-
-## Scalability Considerations
-
-### For Thousands of Documents (Single User)
-
-**Current Design**:
-- PostgreSQL can handle 100K+ events per user
-- pgvector IVFFlat index for fast similarity search
-- Temporal filtering reduces search space
-
-**Optimizations**:
-1. Add caching layer (Redis) for frequent queries
-2. Pre-compute daily summaries asynchronously
-3. Implement query result caching
-
-### For Multiple Users
-
-**Current Design**:
-- All queries filtered by `user_id`
-- Row-level isolation
-
-**Optimizations**:
-1. Partition tables by `user_id`
-2. Separate databases per user (if very large)
-3. Add background workers for ingestion
-
-## Privacy & Security
-
-### Current Approach
-
-- All data scoped to `user_id`
-- No cross-user data leakage
-- API keys stored in environment variables
-
-### For Production
-
-1. **Authentication**: Add JWT-based auth
-2. **Encryption**: Encrypt embeddings and sensitive text at rest
-3. **Local-First Option**:
-   - Run PostgreSQL locally
-   - Use local LLM (Ollama, llama.cpp)
-   - Keep all data on device
-
-**Trade-off**: Local-first sacrifices cloud LLM quality for privacy
+## Deployment Tips
+1. **Push to GitHub** – use the .gitignore already provided (`git add . && git commit`).
+2. **Backend hosting** – Run FastAPI on Render/Railway/Fly/neon-backed VM. Set environment variables there (DB URL, OpenAI key).
+3. **Frontend hosting** – Deploy the Vite build to Vercel/Netlify and point `VITE_API_BASE_URL` at the hosted backend.
+4. **Database** – Use a managed Postgres with pgvector (Neon, Supabase, etc.).
 
 ## Future Enhancements
+- Per-topic timelines and clustering.
+- Automatic weekly recap email using the PDF notes.
+- Elastic/pgvector hybrid search for larger corpora.
 
-1. **Real-time Streaming**: Stream LLM responses token-by-token
-2. **Multi-modal Retrieval**: Support images, videos
-3. **Hybrid Search**: Combine dense (embeddings) + sparse (BM25) retrieval
-4. **Graph Memory**: Build knowledge graph for complex reasoning
-5. **Active Learning**: Let users correct/refine answers
-6. **Mobile App**: iOS/Android clients
-
-## Testing the System
-
-### 1. Start Backend
-```bash
-cd backend
-source venv/bin/activate
-python -m app.main
-```
-
-### 2. Start Frontend
-```bash
-cd frontend
-npm run dev
-```
-
-### 3. Ingest Sample Data
-
-```bash
-# Upload a document
-curl -X POST "http://localhost:8000/api/v1/ingest/document" \
-  -F "file=@sample.pdf" \
-  -F "user_id=1"
-
-# Upload a webpage
-curl -X POST "http://localhost:8000/api/v1/ingest/webpage" \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://en.wikipedia.org/wiki/Artificial_intelligence", "user_id": 1}'
-```
-
-### 4. Ask Questions
-
-Open http://localhost:3000 and ask:
-- "What did I work on today?"
-- "Summarize the main points from the article I saved"
-- "What were the key topics discussed last week?"
-
-## License
-
-MIT
-
-## Author
-
-Built as a take-home assignment showcasing full-stack AI systems design.
+Timeline Thinker already supports the full ingestion → timeline → chat loop, source-specific conversations, session management, and exportable notes. Customize the agents or UI to fit your workflow! 
