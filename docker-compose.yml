@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with pgvector extension
+  db:
+    image: ankane/pgvector:latest
+    container_name: secondbrain-db
+    environment:
+      POSTGRES_DB: secondbrain
+      POSTGRES_USER: REDACTED
+      POSTGRES_PASSWORD: REDACTED
+    ports:
+      - "5432:5432"
+    volumes:
+      - REDACTED_data:/var/lib/REDACTEDql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U REDACTED"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  REDACTED_data:

@@ -1,0 +1,100 @@
+.source-selector {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.selector-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.selector-subtitle {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.clear-source {
+  border: none;
+  background: none;
+  color: #2563eb;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.source-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.source-timeline {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.source-pill {
+  flex: 0 0 auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.source-pill.active {
+  border-color: #2563eb;
+  background: #e0ecff;
+}
+
+.source-pill-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source-pill-meta {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.source-pill-remove {
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.source-pill-remove:hover {
+  color: #ef4444;
+}
+
+.source-empty {
+  color: #64748b;
+  font-size: 0.9rem;
+}

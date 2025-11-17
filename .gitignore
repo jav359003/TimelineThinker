@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+
+# FastAPI/Backend env
+.env
+backend/.env
+
+# Node/Vite
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Logs / misc
+*.log
