@@ -158,7 +158,7 @@ function App() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `timeline_${dateValue}.md`;
+      link.download = `timeline_${dateValue}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -176,7 +176,7 @@ function App() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `session_notes_${today}.md`;
+      link.download = `session_notes_${today}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
