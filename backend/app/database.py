@@ -48,5 +48,22 @@ def init_db():
     """
     # Import all models here to ensure they're registered with Base
     from app.models import user, source, event, entity, topic, timeline
+    from app.models.user import User
 
     Base.metadata.create_all(bind=engine)
+
+    # Ensure default demo user exists (Cloud deployments seed empty DBs)
+    session = SessionLocal()
+    try:
+        default_user_id = 1
+        existing = session.get(User, default_user_id)
+        if not existing:
+            demo_user = User(
+                id=default_user_id,
+                email="demo@timeline-thinker.app",
+                name="Timeline Thinker Demo",
+            )
+            session.add(demo_user)
+            session.commit()
+    finally:
+        session.close()
