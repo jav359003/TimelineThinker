@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+docker-compose.env
+
+# FastAPI/Backend env
+.env
+backend/.env
+.env.*
+
+# Node/Vite
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Logs / misc
+*.log
