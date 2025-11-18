@@ -18,6 +18,7 @@ const SessionPanel = ({
   onSelectSource,
   onRemoveSource,
   onClearSession,
+  onSaveNotes,
 }) => {
   const sources = session?.sources || [];
   const summary = session?.summary;
@@ -32,14 +33,25 @@ const SessionPanel = ({
             {sessionDate || 'No session started yet'}
           </p>
         </div>
-        {onClearSession && (
-          <button
-            className="session-clear-button"
-            onClick={onClearSession}
-          >
-            Clear All
-          </button>
-        )}
+        <div className="session-header-buttons">
+          {onSaveNotes && summary && (
+            <button
+              className="session-save-button"
+              onClick={onSaveNotes}
+              title="Download session notes as Markdown"
+            >
+              Save Notes
+            </button>
+          )}
+          {onClearSession && (
+            <button
+              className="session-clear-button"
+              onClick={onClearSession}
+            >
+              Clear All
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="session-summary">

@@ -52,24 +52,20 @@ class DocumentRetrievalAgent(BaseAgent):
 
         document_events = []
         if focus_source_id:
+            # When a source is focused, get ALL events from that source (audio, document, webpage)
             document_events = self._get_events_for_source(
                 db, user_id, focus_source_id
             )
 
-            # If the focused source isn't a document/webpage, fall back to general retrieval
-            if document_events and not any(
-                evt.event_type in {"document", "webpage"} for evt in document_events
-            ):
-                document_events = []
-
         if not document_events:
-            # Get all document/webpage events for this user
+            # Get all document/webpage/audio events for this user when no source is focused
             document_events = db.query(Event).filter(
                 and_(
                     Event.user_id == user_id,
                     or_(
                         Event.event_type == "document",
-                        Event.event_type == "webpage"
+                        Event.event_type == "webpage",
+                        Event.event_type == "audio"
                     )
                 )
             ).all()

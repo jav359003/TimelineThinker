@@ -158,7 +158,7 @@ function App() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `timeline_${dateValue}.pdf`;
+      link.download = `timeline_${dateValue}.md`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -166,6 +166,24 @@ function App() {
     } catch (error) {
       console.error('Failed to download notes:', error);
       alert('Unable to download notes for this day.');
+    }
+  };
+
+  const handleSaveSessionNotes = async () => {
+    const today = new Date().toISOString().split('T')[0];
+    try {
+      const blob = await downloadTimelineNotes(1, today);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `session_notes_${today}.md`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to save session notes:', error);
+      alert('Unable to save session notes.');
     }
   };
 
@@ -186,6 +204,7 @@ function App() {
           onSelectSource={setSelectedSourceId}
           onRemoveSource={handleSessionSourceRemove}
           onClearSession={handleClearSession}
+          onSaveNotes={handleSaveSessionNotes}
         />
         <SourceSelector
           sources={sources}
