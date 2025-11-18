@@ -17,12 +17,21 @@ app = FastAPI(
 )
 
 # Configure CORS for frontend
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://jav359003.github.io",
+    "https://jav359003.github.io/TimelineThinker",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # React dev servers
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,  # Cache preflight for 1 hour
 )
 
 # Include routers
@@ -69,9 +78,18 @@ async def root():
 @app.get("/health")
 async def health_check():
     """
-    Health check endpoint.
+    Health check endpoint for Cloud Run and monitoring.
     """
-    return {"status": "healthy"}
+    return {"status": "healthy", "service": "Timeline Thinker API"}
+
+
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str):
+    """
+    Handle CORS preflight requests explicitly.
+    This ensures OPTIONS requests return 200 OK in Cloud Run.
+    """
+    return {"status": "ok"}
 
 
 if __name__ == "__main__":
