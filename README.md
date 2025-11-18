@@ -9,7 +9,7 @@ Timeline Thinker is a personal knowledge management system that organizes your i
 
 ## 🎥 Video Demo
 
-[**Watch the full demo and technical walkthrough →**](YOUR_VIDEO_URL_HERE)
+[**Watch the full demo and technical walkthrough →**](https://www.youtube.com/watch?v=ELskyzkAlKc)
 
 <!-- Alternative video embedding options: -->
 
