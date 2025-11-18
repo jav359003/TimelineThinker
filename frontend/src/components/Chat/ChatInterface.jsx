@@ -13,6 +13,7 @@ const ChatInterface = ({
   selectedSourceId = null,
   selectedSource = null,
   onInteractionComplete,
+  onClearMessages,
 }) => {
   const initialMessage = {
     role: 'assistant',
@@ -23,6 +24,15 @@ const ChatInterface = ({
   const [messages, setMessages] = useState([initialMessage]);
   const [isLoading, setIsLoading] = useState(false);
   const lastSourceIdRef = useRef(selectedSourceId);
+
+  // Expose the clear messages function
+  useEffect(() => {
+    if (onClearMessages) {
+      onClearMessages(() => {
+        setMessages([initialMessage]);
+      });
+    }
+  }, [onClearMessages]);
 
   const handleSendMessage = async (userMessage) => {
     // Add user message to chat

@@ -28,6 +28,7 @@ function App() {
   const [session, setSession] = useState(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [selectedTimelineDate, setSelectedTimelineDate] = useState(null);
+  const [clearChatMessages, setClearChatMessages] = useState(null);
 
   // Load timeline data on mount
   useEffect(() => {
@@ -114,6 +115,10 @@ function App() {
     try {
       await clearSession(1);
       setSelectedSourceId(null);
+      // Clear chat messages
+      if (clearChatMessages) {
+        clearChatMessages();
+      }
       loadSession();
     } catch (error) {
       console.error('Failed to clear session:', error);
@@ -220,6 +225,7 @@ function App() {
             sources.find((source) => source.id === selectedSourceId) || null
           }
           onInteractionComplete={handleInteractionComplete}
+          onClearMessages={setClearChatMessages}
         />
       </div>
     </div>
