@@ -34,7 +34,7 @@ const SessionPanel = ({
           </p>
         </div>
         <div className="session-header-buttons">
-          {onSaveNotes && summary && (
+          {onSaveNotes && sources.length > 0 && (
             <button
               className="session-save-button"
               onClick={onSaveNotes}
